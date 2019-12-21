@@ -1,0 +1,25 @@
+{
+  "name": "esquel_dice",
+  "version": "1.0.0",
+  "description": "Analiza las emociones de los twitteros esquelenses y alrededores para mostrar su nivel de felicidad día a día",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "start": "cross-env NODE_ENV=production node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EnzoDiazDev/esquel_dice.git"
+  },
+  "author": "Enzo Diaz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EnzoDiazDev/esquel_dice/issues"
+  },
+  "homepage": "https://github.com/EnzoDiazDev/esquel_dice#readme",
+  "devDependencies": {
+    "cross-env": "^6.0.3",
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.2"
+  }
+}
