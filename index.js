@@ -1,8 +1,7 @@
 if(process.env.NODE_ENV == "development") require("dotenv").config()
 const request = require("request")
 const util = require("util")
-
-//'https://api.twitter.com/labs/1/tweets/stream/filter/rules'
+const rules = require("./config/rules")
 
 async function getBearerToken(){
     let post = util.promisify(request.post)
@@ -17,22 +16,6 @@ async function getBearerToken(){
     return JSON.parse(response.body).access_token
 }
 
-function connect(token){
-    let stream = request.get({
-        url: "https://api.twitter.com/labs/1/tweets/stream/filter?format=detailed",
-        auth: { bearer: token }
-    })
-
-    stream.on("data", data => {
-        try {
-            let dataJSON = JSON.parse(data)
-            console.log(dataJSON)
-        } catch (e) {}
-    }).on("error", e => { if(e.code === "ETIMEDOUT") stream.emit("timeout") })
-
-    return stream
-}
-
 async function getCurrentRules(token){
     let get = util.promisify(request.get)
     let response = await get({
@@ -42,33 +25,6 @@ async function getCurrentRules(token){
 
     if(response.statusCode !== 200) throw new Error(JSON.stringify(response.body))
     return JSON.parse(response.body)
-}
-
-async function setRules(token){
-    let post = util.promisify(request.post)
-    let response = await post({
-        url: "https://api.twitter.com/labs/1/tweets/stream/filter/rules",
-        auth: { bearer: token },
-        json: { add: [
-            // {
-            //     "value": "point_radius:[-71.31 -42.91 40km]" 
-            // },
-            {
-                "value": "bio: Esquel"
-            },
-            {
-                "value": "bio: Trevelin"
-            },
-            {
-                "value": "bio_location: Trevelin"
-            },
-            {
-                "value": "bio_location: Esquel"
-            }
-        ]}
-    })
-
-    if(response.statusCode !== 201) throw new Error(JSON.stringify(response.body))
 }
 
 async function deleteRules(token, rules){
@@ -86,6 +42,38 @@ async function deleteRules(token, rules){
     if(response.statusCode !== 200) throw new Error(JSON.stringify(response.body))
 }
 
+async function setRules(token){
+    let post = util.promisify(request.post)
+    let response = await post({
+        url: "https://api.twitter.com/labs/1/tweets/stream/filter/rules",
+        auth: { bearer: token },
+        json: { add: rules }
+    })
+
+    if(response.statusCode !== 201) throw new Error(JSON.stringify(response.body))
+}
+
+function connect(token){
+    let stream = request.get({
+        url: "https://api.twitter.com/labs/1/tweets/stream/filter?format=detailed",
+        auth: { bearer: token }
+    })
+
+    stream.on("data", rawdata => {
+        try {
+            let data = JSON.parse(rawdata)
+            if(data) stream.emit("tweet", data)
+        } catch (e) {}
+
+    }).on("error", e => { if(e.code === "ETIMEDOUT") stream.emit("timeout") })
+
+    return stream
+}
+
+async function tweetHandler(tweet){
+    if(tweet.data) console.log(tweet.data.text)
+    else console.log(tweet)
+}
 
 async function main(){
     let token = await getBearerToken()
@@ -95,6 +83,8 @@ async function main(){
     await setRules(token)
 
     let stream = connect(token)
+
+    stream.on("tweet", tweetHandler)
 
     let timeout = 0
     stream.on("timeout", () => {
