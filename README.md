@@ -1,3 +1,6 @@
+# Codigo en progreso
+EL archivo principal no hace nada aún, las funciones funcionan. 
+
 # esquel_dice
 Analiza las emociones de los twitteros esquelenses y alrededores para mostrar su nivel de felicidad día a día
 
