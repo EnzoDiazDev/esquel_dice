@@ -46,7 +46,7 @@
     "nodemon": "^2.0.2"
   },
   "dependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "esm": "^3.2.25",
     "request": "^2.88.2"
   }
